@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fake News Generator & Detector</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    input, button, textarea { margin: 10px 0; width: 100%; }
+    .result { margin-top: 20px; padding: 10px; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+
+  <h2>📰 Fake News Generator & Detector</h2>
+
+  <input type="text" id="prompt" placeholder="Enter topic or headline" />
+  <button onclick="generate()">Generate Fake News</button>
+
+  <textarea id="generated" rows="3" readonly placeholder="Generated news will appear here..."></textarea>
+
+  <button onclick="detect()">Detect Fake or Real</button>
+  <button onclick="generateAndDetect()">Generate & Detect</button>
+
+  <div class="result" id="result"></div>
+
+  <script>
+    const API = "http://127.0.0.1:5000";
+
+    async function generate() {
+      const prompt = document.getElementById("prompt").value;
+      const res = await fetch(`${API}/generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt })
+      });
+      const data = await res.json();
+      document.getElementById("generated").value = data.generated;
+      document.getElementById("result").innerText = "";
+    }
+
+    async function detect() {
+      const text = document.getElementById("generated").value;
+      if (!text) return alert("Please generate or enter text first.");
+      const res = await fetch(`${API}/detect`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text })
+      });
+      const data = await res.json();
+      document.getElementById("result").innerText =
+        `🔍 ${data.label} (Confidence: ${data.confidence}%)`;
+    }
+
+    async function generateAndDetect() {
+      const prompt = document.getElementById("prompt").value;
+      const res = await fetch(`${API}/generate_and_detect`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt })
+      });
+      const data = await res.json();
+      document.getElementById("generated").value = data.generated;
+      document.getElementById("result").innerText =
+        `🔍 ${data.label} (Confidence: ${data.confidence}%)`;
+    }
+  </script>
+</body>
+</html>
